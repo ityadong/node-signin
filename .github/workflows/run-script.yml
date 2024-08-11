@@ -1,0 +1,40 @@
+# 这个工作流将安装依赖，运行nodejs的脚本
+# 相关中文文档: https://docs.github.com/zh/actions
+# 工作流扩展：https://github.com/marketplace?type=actions
+
+name: Node Script
+
+on:
+  # 设置可手动运行该工作流
+  workflow_dispatch:
+  # 设置定时任务
+  schedule:
+    # 每天的 UTC 时间 00:00 运行，即北京时间的 08:00
+    # "分钟 小时 日 月份 星期 年份(可选)"
+    - cron: "0 0 * * *"
+
+env:
+  CHINA_MOBILE_SIGNIN_COOKIE: ${{ secrets.CHINA_MOBILE_SIGNIN_COOKIE }}
+  CHINA_UNICOM_SIGNIN_COOKIE: ${{ secrets.CHINA_UNICOM_SIGNIN_COOKIE }}
+  JUEJIN_COOKIE: ${{ secrets.JUEJIN_COOKIE }}
+  SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 签出代码
+      uses: actions/checkout@v4
+    
+    - name: 设置Node版本
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        
+    - name: 安装项目依赖
+      run: |
+        npm install pnpm -g
+        pnpm install
+        
+    - name: 运行脚本
+      run: node ./app.js
