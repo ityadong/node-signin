@@ -18,9 +18,9 @@
 
 # 使用
 
-## 环境配置
+将项目fork到自己的仓库。本项目使用环境变量来管理敏感信息和配置。为了方便本地开发，我们使用 `.env.local` 文件来存储这些变量。
 
-本项目使用环境变量来管理敏感信息和配置。为了方便本地开发，我们使用 `.env.local` 文件来存储这些变量。
+## 环境配置
 
 ### 1. 设置 `.env.local` 文件
 
@@ -35,12 +35,13 @@ pnpm run setup
 ### 2. 设置环境变量
 
 - 本地运行的话，修改根目录下的.env.local文件
-- github actions运行的话，在项目Settings => Secrets and variables => Actions下配置secrets
+- 使用github actions可以实现定时任务，每天自动触发。在项目Settings => Secrets and variables => Actions下配置secrets即可。
 
 | 环境变量名称 | 备注 |
 | --- | --- |
 | CHINA_MOBILE_SIGNIN_COOKIE | 中国移动签到的cookie |
 | CHINA_UNICOM_SIGNIN_COOKIE | 中国联通签到的cookie |
+| JUEJIN_APPEND_URL | 稀土掘金附加url，用于签到和抽奖 |
 | JUEJIN_COOKIE | 稀土掘金的cookie |
 | SERVERCHAN_KEY | server酱的key |
 
@@ -59,9 +60,15 @@ pnpm install
 pnpm run start:local
 ```
 
+# 参数抓包截图
+
+#### 掘金
+
+![掘金相关参数](public/images/juejin.jpg)
+
 # 相关工具
 
-* 抓包工具
+* 手机抓包工具
     * Stream
 
 * Server酱

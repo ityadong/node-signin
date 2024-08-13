@@ -9,12 +9,12 @@ const serverChanKey = process.env.SERVERCHAN_KEY;
 const sendServer = async (title, content) => {
   const serverContent = { text: title, desp: content };
   const serverUrl = `https://sctapi.ftqq.com/${serverChanKey}.send`;
-  console.log("serverContent", serverContent);
+  // console.log("serverContent", serverContent);
   const { status } = await axios.post(serverUrl, serverContent);
   if (status == 200) {
-    console.log(">>>新版Server酱推送成功");
+    console.log(">>>新版Server酱消息推送成功");
   } else {
-    console.log(">>>新版Server酱推送失败");
+    console.log(">>>新版Server酱消息推送失败");
   }
 };
 

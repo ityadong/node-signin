@@ -18,6 +18,7 @@ if (fs.existsSync(envFilePath)) {
 const scripts = [
   "./scripts/china-mobile/index.js",
   "./scripts/china-unicom/index.js",
+  "./scripts/juejin/index.js",
 ];
 
 // 按顺序执行脚本
