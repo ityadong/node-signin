@@ -2,7 +2,7 @@
 # 相关中文文档: https://docs.github.com/zh/actions
 # 工作流扩展：https://github.com/marketplace?type=actions
 
-name: Node Script
+name: daily-node-task
 
 on:
   # 设置可手动运行该工作流
