@@ -1,10 +1,12 @@
 # node-signin
 
-#### 项目介绍
+<img src="public/images/msg.jpg" alt="微信消息提醒" width="375px">
+
+## 介绍
 * node-signin是一个执行日常签到任务的脚本，该项目仅用于学习和交流。
 * 消息推送方案采用Server酱。
 
-# 功能
+#### 目前主要功能
 
 * 稀土掘金
     * 每日自动签到
@@ -13,14 +15,26 @@
 * 中国联通
     * 每日自动签到
 
-* 中国移动
-    * 每日自动签到
-
 # 使用
 
 将项目fork到自己的仓库。本项目使用环境变量来管理敏感信息和配置。为了方便本地开发，我们使用 `.env.local` 文件来存储这些变量。
 
-## 环境配置
+## 安装项目依赖
+
+在根目录运行以下命令
+
+```
+pnpm install
+```
+
+## 运行项目
+
+本地运行
+```
+pnpm run start:local
+```
+
+## 环境变量
 
 ### 1. 设置 `.env.local` 文件
 
@@ -39,26 +53,10 @@ pnpm run setup
 
 | 环境变量名称 | 备注 |
 | --- | --- |
-| CHINA_MOBILE_SIGNIN_COOKIE | 中国移动签到的cookie |
 | CHINA_UNICOM_SIGNIN_COOKIE | 中国联通签到的cookie |
 | JUEJIN_APPEND_URL | 稀土掘金附加url，用于签到和抽奖 |
 | JUEJIN_COOKIE | 稀土掘金的cookie |
 | SERVERCHAN_KEY | server酱的key |
-
-## 安装项目依赖
-
-在根目录运行以下命令
-
-```
-pnpm install
-```
-
-## 运行项目
-
-本地运行
-```
-pnpm run start:local
-```
 
 # 参数抓包截图
 

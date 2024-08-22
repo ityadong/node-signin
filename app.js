@@ -16,7 +16,6 @@ if (fs.existsSync(envFilePath)) {
 
 // 定义要运行的脚本文件
 const scripts = [
-  "./scripts/china-mobile/index.js",
   "./scripts/china-unicom/index.js",
   "./scripts/juejin/index.js",
 ];
