@@ -46,7 +46,11 @@ class JuejinSign {
       const { lottery_name } = data;
       const award = `签到奖励：${incr_point}矿石。
       抽奖奖励：${lottery_name}。`;
-      sendServer(`${this.msgTitle}：成功`, award);
+      if (lottery_name.indexOf('矿石') == -1) {
+        sendServer(`${this.msgTitle}：中奖咯`, award);
+      } else {
+        sendServer(`${this.msgTitle}：成功`, award);
+      }
     } else {
       console.log(">>>抽奖失败！", err_msg);
       sendServer(`掘金抽奖：失败`, err_msg);
@@ -67,5 +71,5 @@ if (cookieValue) {
   const juejin = new JuejinSign(headers);
   juejin.checkIn();
 } else {
-  console.log("未配置环境变量：CHINA_UNICOM_SIGNIN_COOKIE");
+  console.log("执行中断，环境变量未配置：JUEJIN_COOKIE、JUEJIN_APPEND_URL");
 }

@@ -7,6 +7,10 @@ const serverChanKey = process.env.SERVERCHAN_KEY;
 
 // 新版Server酱推送
 const sendServer = async (title, content) => {
+  if (!serverChanKey) {
+    console.log("模板消息发送失败，环境变量未配置：SERVERCHAN_KEY");
+    return
+  }
   const serverContent = { text: title, desp: content };
   const serverUrl = `https://sctapi.ftqq.com/${serverChanKey}.send`;
   // console.log("serverContent", serverContent);

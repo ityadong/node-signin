@@ -44,5 +44,5 @@ if (cookieValue) {
   const unicom = new UnicomSign(headers);
   unicom.daysign();
 } else {
-  console.log("未配置环境变量：CHINA_UNICOM_SIGNIN_COOKIE");
+  console.log("执行中断，环境变量未配置：CHINA_UNICOM_SIGNIN_COOKIE");
 }
