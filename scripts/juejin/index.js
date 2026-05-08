@@ -60,7 +60,7 @@ class JuejinSign {
 
 const headers = {
   "user-agent":
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
   origin: "https://juejin.cn",
   referer: "https://juejin.cn/",
   "content-type": "application/json",
