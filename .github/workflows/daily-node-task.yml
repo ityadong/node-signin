@@ -30,11 +30,23 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 18
-        
-    - name: 安装项目依赖
+        cache: 'pnpm'
+
+    - name: 安装 pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 8
+
+    - name: 配置 pnpm 使用官方源
       run: |
-        npm install pnpm -g
-        pnpm install
+        pnpm config set registry https://registry.npmjs.org/
+        pnpm config set network-timeout 300000
+        pnpm config set fetch-retries 5
+        pnpm config set fetch-retry-mintimeout 20000
+        pnpm config set fetch-retry-maxtimeout 120000
+
+    - name: 安装项目依赖
+      run: pnpm install --no-frozen-lockfile
         
     - name: 运行脚本
       run: node ./app.js
