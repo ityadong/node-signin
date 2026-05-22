@@ -25,17 +25,17 @@ jobs:
     steps:
     - name: 签出代码
       uses: actions/checkout@v4
-    
-    - name: 设置Node版本
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
-        cache: 'pnpm'
 
     - name: 安装 pnpm
       uses: pnpm/action-setup@v4
       with:
         version: 8
+
+    - name: 设置Node版本
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'pnpm'
 
     - name: 配置 pnpm 使用官方源
       run: |
