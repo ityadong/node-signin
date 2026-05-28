@@ -1,0 +1,41 @@
+name: Docker 自动部署
+
+on:
+  push:
+    branches:
+      - feature/docker-deploy
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 登录阿里云镜像仓库
+        run: |
+          echo "${{ secrets.ALIYUN_REGISTRY_PASSWORD }}" | docker login \
+            ${{ secrets.ALIYUN_REGISTRY_URL }} \
+            -u "${{ secrets.ALIYUN_REGISTRY_USERNAME }}" \
+            --password-stdin
+
+      - name: 构建 Docker 镜像
+        run: |
+          docker build -t ${{ secrets.ALIYUN_REGISTRY_URL }}/${{ secrets.ALIYUN_NAMESPACE }}/node-signin:latest .
+          docker build -t ${{ secrets.ALIYUN_REGISTRY_URL }}/${{ secrets.ALIYUN_NAMESPACE }}/node-signin:${{ github.sha }} .
+
+      - name: 推送镜像到阿里云
+        run: |
+          docker push ${{ secrets.ALIYUN_REGISTRY_URL }}/${{ secrets.ALIYUN_NAMESPACE }}/node-signin:latest
+          docker push ${{ secrets.ALIYUN_REGISTRY_URL }}/${{ secrets.ALIYUN_NAMESPACE }}/node-signin:${{ github.sha }}
+
+      - name: 触发 Portainer Webhook
+        run: |
+          curl -X POST ${{ secrets.PORTAINER_WEBHOOK_URL }}
+
+      - name: 部署完成通知
+        run: |
+          echo "✅ 部署完成！"
+          echo "镜像标签: latest, ${{ github.sha }}"
+          echo "提交信息: ${{ github.event.head_commit.message }}"

@@ -17,9 +17,73 @@
 
 # 使用
 
+本项目支持三种运行方式：
+
+## 方式一：Docker 部署（推荐）
+
+使用 Docker 镜像快速部署，支持定时任务自动执行。
+
+### 直接运行
+
+```bash
+docker run -d \
+  --name node-signin \
+  --restart unless-stopped \
+  -e CHINA_UNICOM_SIGNIN_COOKIE="你的联通Cookie" \
+  -e JUEJIN_APPEND_URL="你的掘金URL" \
+  -e JUEJIN_COOKIE="你的掘金Cookie" \
+  -e SERVERCHAN_KEY="你的Server酱Key" \
+  -e TZ=Asia/Shanghai \
+  registry.cn-hangzhou.aliyuncs.com/ityadong/node-signin:latest
+```
+
+### 使用 Docker Compose
+
+创建 `docker-compose.yml` 文件：
+
+```yaml
+version: '3.8'
+
+services:
+  node-signin:
+    image: registry.cn-hangzhou.aliyuncs.com/ityadong/node-signin:latest
+    container_name: node-signin
+    restart: unless-stopped
+    environment:
+      - CHINA_UNICOM_SIGNIN_COOKIE=你的联通Cookie
+      - JUEJIN_APPEND_URL=你的掘金URL
+      - JUEJIN_COOKIE=你的掘金Cookie
+      - SERVERCHAN_KEY=你的Server酱Key
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./logs:/var/log
+```
+
+启动容器：
+
+```bash
+docker-compose up -d
+```
+
+### 查看日志
+
+```bash
+# 查看容器日志
+docker logs -f node-signin
+
+# 查看 cron 定时任务日志
+docker exec node-signin cat /var/log/cron.log
+```
+
+### 定时任务说明
+
+容器内已配置 cron 定时任务，默认每天早上 8:00 自动执行签到。
+
+## 方式二：本地开发
+
 将项目fork到自己的仓库。本项目使用环境变量来管理敏感信息和配置。为了方便本地开发，我们使用 `.env.local` 文件来存储这些变量。
 
-## 安装项目依赖
+### 安装项目依赖
 
 在根目录运行以下命令
 
@@ -27,12 +91,24 @@
 pnpm install
 ```
 
-## 运行项目
+### 运行项目
 
 本地运行
 ```
 pnpm run start:local
 ```
+
+## 方式三：GitHub Actions 手动运行
+
+适合临时测试或手动触发签到任务。
+
+1. 进入 GitHub 仓库页面
+2. 点击 `Actions` 标签
+3. 选择 `daily-node-task` 工作流
+4. 点击 `Run workflow` 按钮
+5. 选择分支后点击 `Run workflow` 执行
+
+**注意**：GitHub Actions 服务器在国外，访问国内服务可能不稳定，建议使用 Docker 部署方式。
 
 ## 环境变量
 

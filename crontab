@@ -1,0 +1,2 @@
+# 每天早上 8:00 执行签到任务
+0 8 * * * cd /app && node app.js >> /var/log/cron.log 2>&1
