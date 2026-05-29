@@ -67,9 +67,10 @@ docker run -d \
 version: '3.8'
 
 services:
-  node-signin:
+  app:
     # 使用当前目录的 Dockerfile 构建镜像
     build: .
+    container_name: node-signin
     restart: unless-stopped
     environment:
       - CHINA_UNICOM_SIGNIN_COOKIE=你的联通Cookie
@@ -100,6 +101,48 @@ docker exec node-signin cat /var/log/cron.log
 ### 定时任务说明
 
 容器内已配置 cron 定时任务，默认每天早上 8:00 自动执行签到。
+
+### 使用 Portainer 部署（推荐用于生产环境）
+
+如果你使用 Portainer 管理 Docker 容器，可以通过 Stack 方式部署：
+
+1. 登录 Portainer 管理界面
+2. 进入 `Stacks` 页面
+3. 点击 `Add stack` 创建新的 Stack
+4. 输入以下配置：
+
+```yaml
+version: '3.8'
+
+services:
+  app:
+    image: registry.cn-hangzhou.aliyuncs.com/ityadong/node-signin:latest
+    # 每次启动时拉取最新镜像
+    pull_policy: always
+    container_name: node-signin
+    restart: unless-stopped
+    environment:
+      - CHINA_UNICOM_SIGNIN_COOKIE=${CHINA_UNICOM_SIGNIN_COOKIE}
+      - JUEJIN_APPEND_URL=${JUEJIN_APPEND_URL}
+      - JUEJIN_COOKIE=${JUEJIN_COOKIE}
+      - SERVERCHAN_KEY=${SERVERCHAN_KEY}
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./logs:/var/log
+```
+
+5. 在 `Environment variables` 区域配置环境变量
+6. 点击 `Deploy the stack`
+
+#### 配置 Webhook 自动更新
+
+为了实现 GitHub Actions 自动部署，需要配置 Portainer Webhook：
+
+1. 在 Stack 详情页面，找到 `Webhooks` 选项
+2. 点击 `Add webhook`
+3. 复制生成的 Webhook URL
+4. 在 GitHub 仓库的 `Settings` → `Secrets and variables` → `Actions` 中添加：
+   - `PORTAINER_WEBHOOK_URL`: 刚才复制的 Webhook URL
 
 ## 方式二：本地开发
 

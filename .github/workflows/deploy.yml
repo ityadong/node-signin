@@ -30,9 +30,30 @@ jobs:
           docker push ${{ secrets.ALIYUN_REGISTRY_URL }}/${{ secrets.ALIYUN_NAMESPACE }}/node-signin:latest
           docker push ${{ secrets.ALIYUN_REGISTRY_URL }}/${{ secrets.ALIYUN_NAMESPACE }}/node-signin:${{ github.sha }}
 
+      - name: 验证镜像推送成功
+        run: |
+          echo "等待镜像完全推送..."
+          sleep 10
+
+          # 验证 latest 标签
+          docker pull ${{ secrets.ALIYUN_REGISTRY_URL }}/${{ secrets.ALIYUN_NAMESPACE }}/node-signin:latest
+
+          # 验证 commit SHA 标签
+          docker pull ${{ secrets.ALIYUN_REGISTRY_URL }}/${{ secrets.ALIYUN_NAMESPACE }}/node-signin:${{ github.sha }}
+
+          echo "✅ 镜像验证成功，可以安全触发部署"
+
       - name: 触发 Portainer Webhook
         run: |
-          curl -X POST ${{ secrets.PORTAINER_WEBHOOK_URL }}
+          response=$(curl -X POST -w "\n%{http_code}" -s ${{ secrets.PORTAINER_WEBHOOK_URL }})
+          http_code=$(echo "$response" | tail -n1)
+
+          if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 204 ]; then
+            echo "✅ Portainer Webhook 触发成功 (HTTP $http_code)"
+          else
+            echo "❌ Portainer Webhook 触发失败 (HTTP $http_code)"
+            exit 1
+          fi
 
       - name: 部署完成通知
         run: |

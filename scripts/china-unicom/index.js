@@ -1,4 +1,4 @@
-const axios = require("axios");
+const request = require("../../utils/request");
 // 引入server酱
 const sendServer = require("../../thirdpart/serverChan");
 
@@ -21,55 +21,48 @@ class UnicomSign {
   }
 
   async daysign() {
-    let lastError = null;
-
     for (let i = 0; i < this.maxRetries; i++) {
-      try {
-        console.log(`尝试第 ${i + 1} 次签到...`);
+      console.log(`尝试第 ${i + 1} 次签到...`);
 
-        const { data } = await axios.post(
-          daySigninUrl,
-          {},
-          {
-            headers: this.headers,
-            timeout: this.timeout
-          }
-        );
-
-        const { code, data: signData, desc } = data;
-        if (code == "0000") {
-          const { redSignMessage } = signData
-          console.log("✓ 联通签到成功！", `抽奖奖励：${redSignMessage}`);
-          sendServer(`${this.msgTitle}：成功`, `抽奖奖励：${redSignMessage}`);
-          return;
-        } else {
-          console.log("✗ 联通签到失败！", desc);
-          sendServer(`${this.msgTitle}：失败`, desc);
-          return;
+      const response = await request.post(
+        daySigninUrl,
+        {},
+        {
+          headers: this.headers,
+          timeout: this.timeout
         }
-      } catch (error) {
-        lastError = error;
-        const errorMsg = error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED'
-          ? '连接超时'
-          : error.message;
+      );
 
-        console.log(`✗ 第 ${i + 1} 次尝试失败: ${errorMsg}`);
+      // 检查是否是错误响应
+      if (response.error) {
+        console.log(`✗ 第 ${i + 1} 次尝试失败: ${response.message}`);
 
         if (i < this.maxRetries - 1) {
           const waitTime = (i + 1) * 2000; // 递增等待时间：2秒、4秒、6秒
           console.log(`等待 ${waitTime / 1000} 秒后重试...`);
           await this.sleep(waitTime);
+          continue;
+        } else {
+          // 所有重试都失败
+          console.log(`✗ 联通签到失败，已重试 ${this.maxRetries} 次: ${response.message}`);
+          await sendServer(`${this.msgTitle}：失败`, `重试 ${this.maxRetries} 次后仍然失败: ${response.message}`);
+          return;
         }
       }
+
+      const { data } = response;
+      const { code, data: signData, desc } = data;
+      if (code == "0000") {
+        const { redSignMessage } = signData
+        console.log("✓ 联通签到成功！", `抽奖奖励：${redSignMessage}`);
+        await sendServer(`${this.msgTitle}：成功`, `抽奖奖励：${redSignMessage}`);
+        return;
+      } else {
+        console.log("✗ 联通签到失败！", desc);
+        await sendServer(`${this.msgTitle}：失败`, desc);
+        return;
+      }
     }
-
-    // 所有重试都失败
-    const finalErrorMsg = lastError?.code === 'ETIMEDOUT' || lastError?.code === 'ECONNABORTED'
-      ? '网络连接超时，可能是 GitHub Actions 无法访问该服务'
-      : lastError?.message || '未知错误';
-
-    console.log(`✗ 联通签到失败，已重试 ${this.maxRetries} 次: ${finalErrorMsg}`);
-    sendServer(`${this.msgTitle}：失败`, `重试 ${this.maxRetries} 次后仍然失败: ${finalErrorMsg}`);
   }
 }
 
