@@ -25,3 +25,6 @@ yarn-error.log*
 *.sln
 *.sw?
 .env
+
+# Docker
+docker-compose.yml

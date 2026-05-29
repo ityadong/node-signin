@@ -23,7 +23,29 @@
 
 使用 Docker 镜像快速部署，支持定时任务自动执行。
 
-### 直接运行
+### 本地部署
+
+先构建镜像：
+
+```bash
+docker build -t node-signin:latest .
+```
+
+然后运行镜像：
+
+```bash
+docker run -d \
+  --name node-signin \
+  --restart unless-stopped \
+  -e CHINA_UNICOM_SIGNIN_COOKIE="你的联通Cookie" \
+  -e JUEJIN_APPEND_URL="你的掘金URL" \
+  -e JUEJIN_COOKIE="你的掘金Cookie" \
+  -e SERVERCHAN_KEY="你的Server酱Key" \
+  -e TZ=Asia/Shanghai \
+  node-signin:latest
+```
+
+### 或者直接使用本项目的镜像直接运行
 
 ```bash
 docker run -d \
@@ -37,7 +59,7 @@ docker run -d \
   registry.cn-hangzhou.aliyuncs.com/ityadong/node-signin:latest
 ```
 
-### 使用 Docker Compose
+### 本地使用 Docker Compose部署
 
 创建 `docker-compose.yml` 文件：
 
@@ -46,8 +68,8 @@ version: '3.8'
 
 services:
   node-signin:
-    image: registry.cn-hangzhou.aliyuncs.com/ityadong/node-signin:latest
-    container_name: node-signin
+    # 使用当前目录的 Dockerfile 构建镜像
+    build: .
     restart: unless-stopped
     environment:
       - CHINA_UNICOM_SIGNIN_COOKIE=你的联通Cookie
@@ -62,7 +84,7 @@ services:
 启动容器：
 
 ```bash
-docker-compose up -d
+docker compose up -d --build
 ```
 
 ### 查看日志

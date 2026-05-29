@@ -27,4 +27,6 @@ cat /etc/crontabs/root
 echo "=========================================="
 
 # 启动 cron 守护进程（前台运行）
-exec crond -f -l 2
+# 使用 busybox crond 并添加 -c 参数指定配置目录
+# -l 0: 显示所有日志级别（包括任务输出）
+exec busybox crond -f -l 0 -L /dev/stdout -c /etc/crontabs
