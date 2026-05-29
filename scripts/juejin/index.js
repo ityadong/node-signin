@@ -1,4 +1,4 @@
-const axios = require("axios");
+const request = require("../../utils/request");
 // 引入server酱
 const sendServer = require("../../thirdpart/serverChan");
 
@@ -19,41 +19,59 @@ class JuejinSign {
 
   // 签到
   async checkIn() {
-    const { data } = await axios.post(
+    const response = await request.post(
       checkInUrl,
       {},
       { headers: this.headers }
     );
+
+    // 检查是否是错误响应
+    if (response.error) {
+      console.log(`✗ ${this.msgTitle}：请求失败`, response.message);
+      await sendServer(`${this.msgTitle}：请求失败`, response.message);
+      return;
+    }
+
+    const { data } = response;
     const { err_no, err_msg, data: juejinData } = data;
     if (err_no == 0) {
       const { incr_point } = juejinData;
-      this.lottery(incr_point);
+      await this.lottery(incr_point);
     } else {
       console.log(`✗ ${this.msgTitle}：失败`, err_msg);
-      sendServer(`${this.msgTitle}：失败`, err_msg);
+      await sendServer(`${this.msgTitle}：失败`, err_msg);
     }
   }
 
   // 抽奖
   async lottery(incr_point) {
-    const { data: axiosData } = await axios.post(
+    const response = await request.post(
       lotteryUrl,
       {},
       { headers: this.headers }
     );
+
+    // 检查是否是错误响应
+    if (response.error) {
+      console.log("✗ 掘金抽奖请求失败！", response.message);
+      await sendServer(`掘金抽奖：请求失败`, response.message);
+      return;
+    }
+
+    const { data: axiosData } = response;
     const { err_no, err_msg, data } = axiosData;
     if (err_no == 0) {
       const { lottery_name } = data;
       const award = `签到奖励：${incr_point}矿石。
       抽奖奖励：${lottery_name}。`;
       if (lottery_name.indexOf('矿石') == -1) {
-        sendServer(`${this.msgTitle}：中奖咯`, award);
+        await sendServer(`${this.msgTitle}：中奖咯`, award);
       } else {
-        sendServer(`${this.msgTitle}：成功`, award);
+        await sendServer(`${this.msgTitle}：成功`, award);
       }
     } else {
       console.log("✗ 掘金抽奖失败！", err_msg);
-      sendServer(`掘金抽奖：失败`, err_msg);
+      await sendServer(`掘金抽奖：失败`, err_msg);
     }
   }
 }
