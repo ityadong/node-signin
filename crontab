@@ -1,3 +1,2 @@
 # 每天早上 08:00 执行签到任务
-# 输出到 stdout 以便 docker logs 可以看到
-00 08 * * * cd /app && node app.js 2>&1
+00 08 * * * cd /app && node app.js > /proc/1/fd/1 2>&1

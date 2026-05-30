@@ -1,32 +1,15 @@
 #!/bin/sh
 
-echo "=========================================="
-echo "容器启动中..."
-echo "当前时间: $(date)"
-echo "时区设置: $TZ"
-echo "=========================================="
+echo "容器启动 | 时间: $(date '+%Y-%m-%d %H:%M:%S') | 时区: $TZ"
 
-# 检查环境变量是否配置
-echo "检查环境变量配置..."
-if [ -z "$CHINA_UNICOM_SIGNIN_COOKIE" ]; then
-  echo "⚠️  警告: CHINA_UNICOM_SIGNIN_COOKIE 未配置"
-fi
+# 检查环境变量
+[ -z "$CHINA_UNICOM_SIGNIN_COOKIE" ] && echo "⚠️  CHINA_UNICOM_SIGNIN_COOKIE 未配置"
+[ -z "$JUEJIN_COOKIE" ] && echo "⚠️  JUEJIN_COOKIE 未配置"
+[ -z "$SERVERCHAN_KEY" ] && echo "⚠️  SERVERCHAN_KEY 未配置"
 
-if [ -z "$JUEJIN_COOKIE" ]; then
-  echo "⚠️  警告: JUEJIN_COOKIE 未配置"
-fi
+echo "定时任务: $(cat /etc/crontabs/root | grep -v '^#' | grep -v '^$')"
+echo "Cron 已启动，日志输出到 /var/log/cron.log"
 
-if [ -z "$SERVERCHAN_KEY" ]; then
-  echo "⚠️  警告: SERVERCHAN_KEY 未配置"
-fi
-
-echo "=========================================="
-echo "启动 cron 定时任务..."
-echo "定时任务配置:"
-cat /etc/crontabs/root
-echo "=========================================="
-
-# 启动 cron 守护进程（前台运行）
-# 使用 busybox crond 并添加 -c 参数指定配置目录
-# -l 0: 显示所有日志级别（包括任务输出）
-exec busybox crond -f -l 0 -L /dev/stdout -c /etc/crontabs
+# 启动 cron 守护进程（前台运行，静默模式）
+# -l 8: 只显示致命错误，屏蔽所有调试和常规日志
+exec busybox crond -f -l 8 -c /etc/crontabs
