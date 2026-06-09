@@ -3,7 +3,7 @@ name: Docker 自动部署
 on:
   push:
     branches:
-      - feature/docker-deploy
+      - master
 
 jobs:
   build-and-deploy:
