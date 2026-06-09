@@ -38,8 +38,8 @@ class JuejinSign {
       const { incr_point } = juejinData;
       await this.lottery(incr_point);
     } else {
-      console.log(`✗ ${this.msgTitle}：失败`, err_msg);
-      await sendServer(`${this.msgTitle}：失败`, err_msg);
+      console.log(`✗ ${this.msgTitle}：失败 [err_no=${err_no}]`, err_msg);
+      await sendServer(`${this.msgTitle}：失败`, `[err_no=${err_no}] ${err_msg}`);
     }
   }
 
@@ -70,8 +70,8 @@ class JuejinSign {
         await sendServer(`${this.msgTitle}：成功`, award);
       }
     } else {
-      console.log("✗ 掘金抽奖失败！", err_msg);
-      await sendServer(`掘金抽奖：失败`, err_msg);
+      console.log(`✗ 掘金抽奖失败！[err_no=${err_no}]`, err_msg);
+      await sendServer(`掘金抽奖：失败`, `[err_no=${err_no}] ${err_msg}`);
     }
   }
 }

@@ -58,8 +58,8 @@ class UnicomSign {
         await sendServer(`${this.msgTitle}：成功`, `抽奖奖励：${redSignMessage}`);
         return;
       } else {
-        console.log("✗ 联通签到失败！", desc);
-        await sendServer(`${this.msgTitle}：失败`, desc);
+        console.log(`✗ 联通签到失败！[code=${code}]`, desc);
+        await sendServer(`${this.msgTitle}：失败`, `[code=${code}] ${desc}`);
         return;
       }
     }

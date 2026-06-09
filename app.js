@@ -11,7 +11,7 @@ const envFilePath = `.env.${environment}`;
 if (fs.existsSync(envFilePath)) {
   dotenv.config({ path: envFilePath });
 } else {
-  console.warn(`Environment file ${envFilePath} does not exist.`);
+  console.log(`提示：未找到 ${envFilePath}，将使用已注入的环境变量（Docker 场景正常）`);
 }
 
 // 定义要运行的脚本文件
