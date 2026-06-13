@@ -1,36 +1,32 @@
 const axios = require("axios");
-const { isDebug, mask, debugLog } = require("./logger");
+const { mask, httpLog } = require("./logger");
 
 // 创建 axios 实例
 const request = axios.create({
   timeout: 30000,
 });
 
-// 请求拦截器 - 调试日志（开启 DEBUG_HTTP 时生效）
+// 请求拦截器 - 始终记录请求日志（cookie 脱敏）
 request.interceptors.request.use(
   (config) => {
-    if (isDebug()) {
-      const method = (config.method || "get").toUpperCase();
-      const url = config.url || "";
-      const cookie = config.headers?.cookie || config.headers?.Cookie;
-      debugLog("→ 请求", method, url);
-      debugLog("  cookie:", mask(cookie));
-      if (config.data !== undefined) {
-        debugLog("  body:", config.data);
-      }
+    const method = (config.method || "get").toUpperCase();
+    const url = config.url || "";
+    const cookie = config.headers?.cookie || config.headers?.Cookie;
+    httpLog("→ 请求", method, url);
+    httpLog("  cookie:", mask(cookie));
+    if (config.data !== undefined) {
+      httpLog("  body:", config.data);
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// 响应拦截器 - 统一错误处理
+// 响应拦截器 - 始终记录响应日志，并统一错误处理
 request.interceptors.response.use(
   (response) => {
-    if (isDebug()) {
-      debugLog("← 响应", response.status, response.config?.url || "");
-      debugLog("  data:", response.data);
-    }
+    httpLog("← 响应", response.status, response.config?.url || "");
+    httpLog("  data:", response.data);
     return response;
   },
   (error) => {
@@ -41,10 +37,8 @@ request.interceptors.response.use(
 
     console.log("✗ HTTP请求异常:", errorMessage);
 
-    if (isDebug()) {
-      debugLog("← 错误响应", error.response?.status || 0, error.config?.url || "");
-      debugLog("  data:", error.response?.data || null);
-    }
+    httpLog("← 错误响应", error.response?.status || 0, error.config?.url || "");
+    httpLog("  data:", error.response?.data || null);
 
     // 返回一个包含错误信息的对象，而不是抛出异常
     return Promise.resolve({

@@ -102,6 +102,37 @@ docker exec node-signin cat /var/log/cron.log
 
 容器内已配置 cron 定时任务，默认每天早上 8:00 自动执行签到。
 
+## HTTP 日志与排查
+
+为方便排查签到失败（例如 Server酱 收到 `err_no=xxxx`、或提示「签到失败了~」），项目会把每次签到的 HTTP 请求与响应**始终记录**到日志文件，无需任何开关。
+
+### 日志位置
+
+- 文件名：`http.log`（位于 `LOG_DIR`，默认 `./logs`；Docker 中为 `/var/log`，已挂载到宿主机 `./logs`）
+- 记录内容：请求方法、URL、**脱敏后的 cookie**（只显示长度和首尾几位，不输出明文）、请求体，以及响应状态码和完整响应体（含掘金返回的 `err_no`、`err_msg`）
+
+查看最近日志：
+
+```bash
+# 宿主机直接看（日志已挂载出来）
+tail -n 50 logs/http.log
+
+# 或进容器看
+docker exec node-signin tail -n 50 /var/log/http.log
+```
+
+### 日志轮转
+
+为避免日志无限增长，文件超过 `LOG_MAX_SIZE`（默认 5MB）时自动轮转：`http.log → http.log.1 → http.log.2 → ...`，最多保留 `LOG_MAX_FILES` 份（默认 3 份），最老的自动删除。最坏占用约 `LOG_MAX_SIZE ×(LOG_MAX_FILES + 1)` 封顶（默认约 20MB）。
+
+### DEBUG_HTTP 开关
+
+`DEBUG_HTTP` **只控制是否额外把日志打印到控制台**，不影响文件记录。临时在前台看实时输出时可用，例如不影响生产 cron、单独跑一次掘金脚本：
+
+```bash
+docker exec -e DEBUG_HTTP=true node-signin node /app/scripts/juejin/index.js
+```
+
 ### 使用 Portainer 部署（推荐用于生产环境）
 
 如果你使用 Portainer 管理 Docker 容器，可以通过 Stack 方式部署：
@@ -198,6 +229,10 @@ pnpm run setup
 | JUEJIN_APPEND_URL | 稀土掘金附加url，用于签到和抽奖 |
 | JUEJIN_COOKIE | 稀土掘金的cookie |
 | SERVERCHAN_KEY | server酱的key |
+| DEBUG_HTTP | 可选。设为 `true`/`1` 时，HTTP 请求/响应额外打印到控制台（不影响日志文件，详见「HTTP 日志与排查」） |
+| LOG_DIR | 可选。日志目录，默认 `./logs`（Docker 中为 `/var/log`，已挂载到宿主机 `./logs`） |
+| LOG_MAX_SIZE | 可选。单个日志文件大小上限（字节），默认 `5242880`（5MB），超过即轮转 |
+| LOG_MAX_FILES | 可选。保留的历史日志份数，默认 `3`（`http.log.1` ~ `http.log.3`） |
 
 # 参数抓包截图
 
