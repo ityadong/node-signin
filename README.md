@@ -118,7 +118,7 @@ docker exec node-signin cat /var/log/cron.log
 tail -n 50 logs/http.log
 
 # 或进容器看
-docker exec node-signin tail -n 50 /var/log/http.log
+docker exec node-signin tail -n 50 /app/logs/http.log
 ```
 
 ### 日志轮转
