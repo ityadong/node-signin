@@ -11,35 +11,62 @@ const checkInUrl = `https://api.juejin.cn/growth_api/v1/check_in?${ appendUrl }`
 // 抽奖url
 const lotteryUrl = `https://api.juejin.cn/growth_api/v1/lottery/draw?${ appendUrl }`;
 
+// 最大重连次数（首次失败后额外重试的次数）
+const MAX_RETRIES = 3;
+// 重连间隔（毫秒）
+const RETRY_DELAY = 2000;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 class JuejinSign {
   constructor(headers) {
     this.msgTitle = "掘金签到";
     this.headers = headers;
   }
 
-  // 签到
+  // 签到（失败自动重连，最多 MAX_RETRIES 次）
   async checkIn() {
-    const response = await request.post(
-      checkInUrl,
-      {},
-      { headers: this.headers }
-    );
+    let lastFail = null;
 
-    // 检查是否是错误响应
-    if (response.error) {
-      console.log(`✗ ${this.msgTitle}：请求失败`, response.message);
-      await sendServer(`${this.msgTitle}：请求失败`, response.message);
-      return;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      if (attempt > 0) {
+        console.log(`↻ ${this.msgTitle}：第 ${attempt}/${MAX_RETRIES} 次重连...`);
+        await sleep(RETRY_DELAY);
+      }
+
+      const response = await request.post(
+        checkInUrl,
+        {},
+        { headers: this.headers }
+      );
+
+      // HTTP 层异常，记录后重试
+      if (response.error) {
+        lastFail = { title: `${this.msgTitle}：请求失败`, desp: response.message };
+        console.log(`✗ ${lastFail.title}`, response.message);
+        continue;
+      }
+
+      const { err_no, err_msg, data: juejinData } = response.data;
+
+      // 签到成功，进入抽奖并结束
+      if (err_no == 0) {
+        const { incr_point } = juejinData;
+        await this.lottery(incr_point);
+        return;
+      }
+
+      // 业务失败，记录后重试
+      lastFail = {
+        title: `${this.msgTitle}：失败`,
+        desp: `[err_no=${err_no}] ${err_msg}`,
+      };
+      console.log(`✗ ${lastFail.title} ${lastFail.desp}`);
     }
 
-    const { data } = response;
-    const { err_no, err_msg, data: juejinData } = data;
-    if (err_no == 0) {
-      const { incr_point } = juejinData;
-      await this.lottery(incr_point);
-    } else {
-      console.log(`✗ ${this.msgTitle}：失败 [err_no=${err_no}]`, err_msg);
-      await sendServer(`${this.msgTitle}：失败`, `[err_no=${err_no}] ${err_msg}`);
+    // 重试耗尽仍失败，推送最后一次失败信息
+    if (lastFail) {
+      await sendServer(lastFail.title, `${lastFail.desp}（已重试 ${MAX_RETRIES} 次）`);
     }
   }
 
